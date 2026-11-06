@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZOR DO‘KON — Internet do‘kon</title>
+<style>
+:root{--bg:#f5f7fb;--ink:#172033;--muted:#697386;--blue:#315efb;--line:#e6eaf2;--card:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,Arial,sans-serif}
+header{background:#101a35;color:white;padding:16px max(5vw,18px);display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.logo{font-weight:900;font-size:23px;letter-spacing:.4px}.logo span{color:#79a0ff}
+nav{display:flex;gap:8px;flex-wrap:wrap}button,.btn{border:0;border-radius:12px;padding:11px 15px;background:var(--blue);color:white;font-weight:700;cursor:pointer}
+button.secondary{background:#263451}button.light{background:#edf1ff;color:#2448c8}
+main{max-width:1120px;margin:26px auto;padding:0 18px}
+.hero{background:linear-gradient(120deg,#18264a,#315efb);color:white;border-radius:24px;padding:30px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+.hero h1{font-size:clamp(27px,5vw,42px);margin:0 0 8px}.hero p{margin:0;color:#dce5ff;max-width:550px}
+.tools{display:flex;gap:10px;margin:22px 0;flex-wrap:wrap}.tools input{flex:1;min-width:190px}
+input,textarea,select{width:100%;border:1px solid var(--line);border-radius:11px;padding:12px;font:inherit;background:white;color:var(--ink)}
+.sectionhead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:24px 0 14px}.sectionhead h2{margin:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.photo{height:170px;background:#edf1f8;display:grid;place-items:center;color:#8993a7;font-size:42px}.photo img{width:100%;height:100%;object-fit:cover}
+.details{padding:14px}.details h3{margin:0 0 7px;font-size:17px}.price{font-weight:900;color:#244bd7;font-size:19px}.muted{color:var(--muted);font-size:13px}
+.actions{display:flex;gap:8px;margin-top:12px}.actions button{flex:1;padding:10px 8px}
+.panel{background:white;border:1px solid var(--line);border-radius:18px;padding:18px;margin-top:18px}
+.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.full{grid-column:1/-1}
+label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
+.hidden{display:none!important}.modalback{position:fixed;inset:0;background:#10182bb8;display:grid;place-items:center;padding:16px;z-index:5}
+.modal{background:white;border-radius:20px;padding:22px;width:min(480px,100%);max-height:90vh;overflow:auto}.modal h2{margin-top:0}
+footer{text-align:center;color:var(--muted);padding:35px 15px;font-size:13px}
+.notice{background:#fff7df;border:1px solid #f2dfa3;color:#725500;padding:12px 14px;border-radius:12px;margin-top:16px;font-size:13px}
+.empty{padding:28px;text-align:center;color:var(--muted);background:white;border-radius:16px}
+@media(max-width:600px){header{align-items:flex-start}.formgrid{grid-template-columns:1fr}.full{grid-column:auto}.hero{padding:23px}.sectionhead{align-items:flex-start;flex-direction:column}}
+</style></head>
+<body>
+<header><div class="logo">ZOR <span>DO‘KON</span></div><nav>
+<button class="secondary" onclick="showProducts()">Bosh sahifa</button>
+<button class="secondary" onclick="showCart()">🛒 Savat <b id="cartCount">0</b></button>
+<button class="light" onclick="openAuth()">Profil / Kirish</button>
+</nav></header>
+<main>
+<section class="hero"><div><h1>Kerakli mahsulotlar — bir joyda</h1><p>ZOR DO‘KON’da mahsulotlarni toping, savatga qo‘shing va buyurtma bering.</p></div><button onclick="document.getElementById('catalog').scrollIntoView({behavior:'smooth'})">Xaridni boshlash</button></section>
+<div class="notice"><b>Sinov versiyasi:</b> mahsulotlar, savat va buyurtmalar shu qurilmada saqlanadi. Google/telefon orqali haqiqiy kirish va buyurtmalarni internetda saqlash uchun server hamda autentifikatsiya sozlamalari kerak.</div>
+<section id="seller" class="panel">
+<div class="sectionhead"><h2>＋ Mahsulot joylash</h2><span class="muted">Sotuvchi bo‘limi · demo</span></div>
+<form id="productForm" class="formgrid">
+<div><label>Mahsulot nomi</label><input id="pname" required placeholder="Masalan: Quloqchin"></div>
+<div><label>Narxi (so‘m)</label><input id="pprice" type="number" min="1" required placeholder="150000"></div>
+<div><label>Kategoriya</label><select id="pcat"><option>Elektronika</option><option>Kiyim</option><option>Uy-ro‘zg‘or</option><option>O‘yinchoqlar</option><option>Boshqa</option></select></div>
+<div><label>Rasmga olish yoki rasm tanlash</label><input id="pimage" type="file" accept="image/*" capture="environment"></div>
+<div class="full"><label>Mahsulot haqida</label><textarea id="pdesc" rows="2" placeholder="Mahsulot tavsifi..."></textarea></div>
+<div class="full"><button type="submit">Mahsulotni do‘konga chiqarish</button></div>
+</form></section>
+<section id="catalog"><div class="sectionhead"><h2 id="catalogTitle">Mahsulotlar</h2><span class="muted">ZOR DO‘KON katalogi</span></div>
+<div class="tools"><input id="search" placeholder="Mahsulot qidirish..." oninput="renderProducts()"><select id="filter" onchange="renderProducts()" style="max-width:190px"><option value="">Barcha kategoriyalar</option><option>Elektronika</option><option>Kiyim</option><option>Uy-ro‘zg‘or</option><option>O‘yinchoqlar</option><option>Boshqa</option></select></div>
+<div class="grid" id="products"></div></section>
+<section id="cartSection" class="panel hidden"><div class="sectionhead"><h2>Savatingiz</h2><button class="light" onclick="showProducts()">Xaridni davom ettirish</button></div><div id="cartItems"></div><div id="checkout" class="hidden"><hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><h3>Buyurtma ma’lumotlari</h3><div class="formgrid"><div><label>Ismingiz</label><input id="buyerName" placeholder="Ism familiya"></div><div><label>Telefon raqamingiz</label><input id="buyerPhone" type="tel" placeholder="+998 90 123 45 67"></div><div class="full"><label>Yetkazib berish manzili</label><textarea id="buyerAddress" rows="2" placeholder="Viloyat, tuman, ko‘cha..."></textarea></div><div class="full"><button onclick="placeOrder()">Buyurtmani tasdiqlash</button></div></div></div></section>
+<section id="profileSection" class="panel hidden"><h2>Profil va buyurtmalar</h2><div id="profileInfo" class="muted">Profilga kirish uchun yuqoridagi tugmani bosing.</div><div id="orders"></div></section>
+</main><footer>© 2026 ZOR DO‘KON · Sinov internet do‘koni</footer>
+<div id="authModal" class="modalback hidden"><div class="modal"><button class="light" style="float:right" onclick="closeAuth()">Yopish</button><h2>Profilga kirish</h2><p class="muted">Demo rejimida ism va telefon bilan profil ochishingiz mumkin.</p><label>Ismingiz</label><input id="authName" placeholder="Ismingiz"><label style="margin-top:12px">Telefon raqamingiz</label><input id="authPhone" type="tel" placeholder="+998..."><button style="width:100%;margin-top:14px" onclick="demoLogin()">Profil yaratish / kirish</button><button class="secondary" style="width:100%;margin-top:9px" onclick="googleLogin()">Google orqali kirish</button>
+<button style="width:100%;margin-top:9px" onclick="phoneLogin()">SMS kod bilan telefonni tasdiqlash</button></div></div>
+<script>
+const starter=[
+ {id:1,name:"Simsiz quloqchin",price:185000,cat:"Elektronika",desc:"Kundalik foydalanish uchun qulay.",emoji:"🎧"},
+ {id:2,name:"Sport ryukzak",price:129000,cat:"Kiyim",desc:"Yengil va qulay ryukzak.",emoji:"🎒"},
+ {id:3,name:"Stol chirog‘i",price:99000,cat:"Uy-ro‘zg‘or",desc:"Ish va o‘qish uchun.",emoji:"💡"}
+];
+let products=JSON.parse(localStorage.getItem("zor_products")||"null")||starter;
+let cart=JSON.parse(localStorage.getItem("zor_cart")||"[]");
+let user=JSON.parse(localStorage.getItem("zor_user")||"null");
+let orders=JSON.parse(localStorage.getItem("zor_orders")||"[]");
+const money=n=>Number(n).toLocaleString("uz-UZ")+" so‘m";
+function save(){localStorage.setItem("zor_products",JSON.stringify(products));localStorage.setItem("zor_cart",JSON.stringify(cart));localStorage.setItem("zor_orders",JSON.stringify(orders));localStorage.setItem("zor_user",JSON.stringify(user));}
+function renderProducts(){let q=document.getElementById("search").value.toLowerCase(),f=document.getElementById("filter").value;let list=products.filter(p=>p.name.toLowerCase().includes(q)&&(!f||p.cat===f));document.getElementById("products").innerHTML=list.length?list.map(p=>`<article class="card"><div class="photo">${p.image?`<img src="${p.image}" alt="">`:p.emoji||"📦"}</div><div class="details"><div class="muted">${p.cat}</div><h3>${esc(p.name)}</h3><div class="price">${money(p.price)}</div><p class="muted">${esc(p.desc||"")}</p><div class="actions"><button onclick="addCart(${p.id})">Savatga</button></div></div></article>`).join(""):'<div class="empty">Hozircha mahsulot topilmadi.</div>';}
+function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+document.getElementById("productForm").addEventListener("submit",e=>{e.preventDefault();let file=document.getElementById("pimage").files[0],finish=image=>{products.unshift({id:Date.now(),name:document.getElementById("pname").value,price:Number(document.getElementById("pprice").value),cat:document.getElementById("pcat").value,desc:document.getElementById("pdesc").value,image,emoji:"📦"});save();renderProducts();e.target.reset();alert("Mahsulot do‘konga qo‘shildi!");};if(file){let r=new FileReader();r.onload=()=>finish(r.result);r.readAsDataURL(file);}else finish(null);});
+function addCart(id){let p=products.find(x=>x.id===id);let row=cart.find(x=>x.id===id);if(row)row.qty++;else cart.push({id,qty:1});save();updateCount();alert(p.name+" savatga qo‘shildi.");}
+function updateCount(){document.getElementById("cartCount").textContent=cart.reduce((a,x)=>a+x.qty,0);}
+function showProducts(){document.getElementById("cartSection").classList.add("hidden");document.getElementById("profileSection").classList.add("hidden");document.getElementById("catalog").classList.remove("hidden");document.getElementById("seller").classList.remove("hidden");}
+function showCart(){document.getElementById("catalog").classList.add("hidden");document.getElementById("seller").classList.add("hidden");document.getElementById("profileSection").classList.add("hidden");document.getElementById("cartSection").classList.remove("hidden");renderCart();}
+function renderCart(){let el=document.getElementById("cartItems");if(!cart.length){el.innerHTML='<div class="empty">Savatingiz hozircha bo‘sh.</div>';document.getElementById("checkout").classList.add("hidden");return;}let total=0;el.innerHTML=cart.map(x=>{let p=products.find(p=>p.id===x.id);if(!p)return"";total+=p.price*x.qty;return `<div style="display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)"><div><b>${esc(p.name)}</b><div class="muted">${money(p.price)} × ${x.qty}</div></div><button class="light" onclick="removeCart(${x.id})">O‘chirish</button></div>`}).join("")+`<h3>Jami: ${money(total)}</h3>`;document.getElementById("checkout").classList.remove("hidden");}
+function removeCart(id){cart=cart.filter(x=>x.id!==id);save();updateCount();renderCart();}
+function placeOrder(){if(!user){alert("Avval profil yarating yoki tizimga kiring.");openAuth();return;}let name=document.getElementById("buyerName").value||user.name,phone=document.getElementById("buyerPhone").value||user.phone,address=document.getElementById("buyerAddress").value;if(!phone||!address){alert("Telefon va manzilni kiriting.");return;}let items=cart.map(x=>{let p=products.find(p=>p.id===x.id);return {name:p?.name,price:p?.price,qty:x.qty};});orders.unshift({id:Date.now(),name,phone,address,items,date:new Date().toLocaleString("uz-UZ")});cart=[];save();updateCount();renderCart();alert("Buyurtma demo rejimida saqlandi. Sotuvchi uni faqat shu qurilmada ko‘radi.");}
+function openAuth(){document.getElementById("authModal").classList.remove("hidden")}function closeAuth(){document.getElementById("authModal").classList.add("hidden")}
+function demoLogin(){let name=document.getElementById("authName").value.trim(),phone=document.getElementById("authPhone").value.trim();if(!name||!phone){alert("Ism va telefonni kiriting.");return;}user={name,phone};save();closeAuth();document.getElementById("profileSection").classList.remove("hidden");document.getElementById("catalog").classList.add("hidden");document.getElementById("seller").classList.add("hidden");document.getElementById("cartSection").classList.add("hidden");renderProfile();}
+function renderProfile(){document.getElementById("profileInfo").innerHTML=`<p><b>${esc(user.name)}</b> · ${esc(user.phone)}</p><button class="light" onclick="logout()">Chiqish</button>`;document.getElementById("orders").innerHTML="<h3>Buyurtmalar</h3>"+(orders.length?orders.map(o=>`<div class="panel"><b>Buyurtma #${o.id}</b><p class="muted">${o.date} · ${esc(o.phone)}</p>${o.items.map(i=>`${esc(i.name)} × ${i.qty}`).join("<br>")}<p><b>${esc(o.address)}</b></p></div>`).join(""):'<p class="muted">Hozircha buyurtmalar yo‘q.</p>');}
+function logout(){user=null;save();document.getElementById("profileSection").classList.add("hidden");showProducts();}
+renderProducts();updateCount();if(user){document.getElementById("profileInfo").textContent="Profil: "+user.name;}
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCWTHLJ8T4WPO7BpRD7RPidWIFFTOdL7TA",
+  authDomain: "zor-dokon.firebaseapp.com",
+  projectId: "zor-dokon",
+  storageBucket: "zor-dokon.firebasestorage.app",
+  messagingSenderId: "936598444593",
+  appId: "1:936598444593:web:e66529d098cf0f77821310",
+  measurementId: "G-12Z5S9SXMP"
+};
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const zorAuth = firebase.auth();
+const zorDb = firebase.firestore();
+let zorConfirmation = null, zorRecaptcha = null;
+
+function zorEnsureRecaptcha() {
+  if (!zorRecaptcha) zorRecaptcha = new firebase.auth.RecaptchaVerifier("recaptcha-container", {size:"invisible"});
+  return zorRecaptcha;
+}
+async function googleLogin() {
+  try { await zorAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
+  catch(e) { alert("Google orqali kirishda xatolik: " + e.message); }
+}
+async function phoneLogin() {
+  const phone = document.getElementById("authPhone").value.trim();
+  if (!/^\+[1-9]\d{7,14}$/.test(phone)) {
+    alert("Telefonni xalqaro formatda kiriting. Masalan: +998901234567"); return;
+  }
+  try {
+    zorConfirmation = await zorAuth.signInWithPhoneNumber(phone, zorEnsureRecaptcha());
+    const code = prompt("SMS orqali kelgan tasdiqlash kodini kiriting:");
+    if (code) await zorConfirmation.confirm(code.trim());
+  } catch(e) {
+    if (zorRecaptcha) { try { zorRecaptcha.clear(); } catch(_) {} zorRecaptcha = null; }
+    alert("Telefon orqali kirishda xatolik: " + e.message);
+  }
+}
+zorAuth.onAuthStateChanged(async fbUser => {
+  if (!fbUser) return;
+  user = {uid:fbUser.uid, name:fbUser.displayName || document.getElementById("authName").value.trim() || "Foydalanuvchi",
+          phone:fbUser.phoneNumber || fbUser.email || ""};
+  save(); closeAuth();
+  document.getElementById("profileSection").classList.remove("hidden");
+  document.getElementById("catalog").classList.add("hidden");
+  document.getElementById("seller").classList.add("hidden");
+  document.getElementById("cartSection").classList.add("hidden");
+  renderProfile();
+  try { await zorDb.collection("users").doc(fbUser.uid).set({
+    uid:fbUser.uid, name:user.name, phone:user.phone, email:fbUser.email || null,
+    updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+  }, {merge:true}); } catch(e) { console.error(e); }
+});
+async function logout() {
+  try { await zorAuth.signOut(); user=null; save(); document.getElementById("profileSection").classList.add("hidden"); showProducts(); }
+  catch(e) { alert(e.message); }
+}
+async function zorSaveLatestProduct() {
+  const p=products[0]; if(!p) return;
+  try { await zorDb.collection("products").doc(String(p.id)).set({...p, updatedAt:firebase.firestore.FieldValue.serverTimestamp()}, {merge:true}); }
+  catch(e) { console.error("Mahsulot Firestore'ga saqlanmadi:",e); }
+}
+document.getElementById("productForm").addEventListener("submit", () => setTimeout(zorSaveLatestProduct, 500));
+async function zorLoadProducts() {
+  try {
+    const snap=await zorDb.collection("products").get();
+    if(!snap.empty) { products=snap.docs.map(d=>d.data()).sort((a,b)=>Number(b.id)-Number(a.id)); localStorage.setItem("zor_products",JSON.stringify(products)); renderProducts(); }
+  } catch(e) { console.warn("Firestore mahsulotlari yuklanmadi:",e.message); }
+}
+zorLoadProducts();
+placeOrder = async function() {
+  if(!zorAuth.currentUser) { alert("Avval Google yoki SMS orqali tizimga kiring."); openAuth(); return; }
+  const name=document.getElementById("buyerName").value || user.name;
+  const phone=document.getElementById("buyerPhone").value || user.phone;
+  const address=document.getElementById("buyerAddress").value.trim();
+  if(!phone || !address || !cart.length) { alert("Telefon, manzil va savatni tekshiring."); return; }
+  const items=cart.map(x=>{const p=products.find(p=>p.id===x.id); return {name:p?.name||"",price:p?.price||0,qty:x.qty};});
+  try {
+    await zorDb.collection("orders").add({uid:zorAuth.currentUser.uid,name,phone,address,items,status:"new",
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    orders.unshift({id:Date.now(),name,phone,address,items,date:new Date().toLocaleString("uz-UZ")});
+    cart=[]; save(); updateCount(); renderCart(); alert("Buyurtma Firebase'ga yuborildi!");
+  } catch(e) { alert("Buyurtma saqlanmadi: "+e.message); }
+};
+demoLogin = function(){ alert("Google orqali yoki SMS kod bilan kirish tugmasidan foydalaning."); };
+</script>
+<div id="recaptcha-container"></div>
+
+</body></html>
